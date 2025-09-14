@@ -7,18 +7,18 @@ import ultralytics.nn.modules as modules
 import torch.nn as nn
 import torch.nn.modules.container as container
 
-# Разрешаем необходимые классы
+
 torch.serialization.add_safe_globals([
     tasks.DetectionModel,
     container.Sequential,
     modules.Conv
 ])
 
-# ⚡ Патчим torch.load чтобы YOLO грузился как раньше
+
 _old_torch_load = torch.load
 def _patched_torch_load(*args, **kwargs):
     if "weights_only" not in kwargs:
-        kwargs["weights_only"] = False  # ключевой фикс!
+        kwargs["weights_only"] = False  
     return _old_torch_load(*args, **kwargs)
 torch.load = _patched_torch_load
 
@@ -39,10 +39,9 @@ def train(dataset_name, pretrained="yolov8m.pt", epochs=30, imgsz=640, batch=16,
 
     print(f"🚀 Training {dataset_name} using data {data_yaml}, pretrained {pretrained}")
 
-    # Загружаем модель
     model = YOLO(pretrained)
 
-    # Обучение
+
     results = model.train(
         data=str(data_yaml),
         epochs=epochs,
@@ -51,7 +50,7 @@ def train(dataset_name, pretrained="yolov8m.pt", epochs=30, imgsz=640, batch=16,
         name=name
     )
 
-    # Путь к лучшим весам
+
     run_dir = PROJECT_ROOT / "runs" / "detect" / name / "weights"
     best = run_dir / "best.pt"
 
@@ -90,3 +89,4 @@ if __name__ == "__main__":
               imgsz=args.imgsz,
               batch=args.batch,
               name='cleanliness_yolov8m')
+
