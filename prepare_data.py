@@ -13,15 +13,13 @@ def write_yaml(path, content):
 def make_data_yaml(dataset_name):
     ds = PROJECT_ROOT / "datasets" / dataset_name
     assert ds.exists(), f"{ds} not found"
-    # build relative paths (relative to dataset yaml file as typical for yolov8)
+
     data = {
         'train': 'train/images',
         'val': 'valid/images',
         'test': 'test/images' if (ds / 'test').exists() else 'test/images'
     }
-    # Read nc and names if you want to keep Roboflow metadata; here try to deduce from labels
-    # For safety we leave user to set nc/names manually if needed. We'll attempt a small heuristic:
-    # Count unique classes in labels
+ 
     classes = set()
     for split in ['train','valid','test']:
         lbl_dir = ds / split / 'labels'
@@ -34,7 +32,6 @@ def make_data_yaml(dataset_name):
                         parts = line.strip().split()
                         classes.add(parts[0])
     if classes:
-        # make names placeholder 'class0','class1' — user should update if Roboflow had human names
         names = [f"class{int(c)}" for c in sorted(map(int, classes))]
     else:
         names = []
@@ -84,7 +81,6 @@ def make_cleanliness_image_labels():
                         if cl == 0:
                             is_clean = 1
                             break
-            # label: 1 == clean, 0 == dirty
             rows.append([str(img.relative_to(PROJECT_ROOT)), is_clean])
     if rows:
         with open(out_csv, 'w', newline='', encoding='utf-8') as f:
@@ -96,7 +92,7 @@ def make_cleanliness_image_labels():
         print("No images found for cleanliness to write image_labels.csv")
 
 if __name__ == "__main__":
-    # generate data.yaml for both datasets
     for ds in ['cleanliness','damage']:
         make_data_yaml(ds)
     make_cleanliness_image_labels()
+
